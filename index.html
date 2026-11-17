@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CET-4 错题讲解助手 | CET-4 Wrong-Question Explainer</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#f6f7fb;color:#1f2430;line-height:1.6}
+header{background:#1e3a8a;color:#fff;padding:28px 18px 22px;text-align:center}
+header h1{font-size:24px;line-height:1.3}
+header p{opacity:.9;font-size:14px;margin-top:8px}
+.badge{display:inline-block;background:#f59e0b;color:#111827;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;margin-top:10px}
+main{max-width:860px;margin:0 auto;padding:18px 14px 40px}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+h2{font-size:18px;margin-bottom:10px}
+h3{font-size:15px;margin:12px 0 6px;color:#1e3a8a}
+p.small{font-size:13px;color:#6b7280}
+textarea{width:100%;min-height:130px;border:1px solid #d1d5db;border-radius:10px;padding:12px;font-size:15px;line-height:1.6;resize:vertical}
+textarea:focus{outline:2px solid #93c5fd;border-color:#3b82f6}
+.btn{display:inline-block;border:0;border-radius:999px;padding:10px 18px;font-size:15px;font-weight:700;cursor:pointer;margin:6px 6px 0 0}
+.btn-primary{background:#2563eb;color:#fff}
+.btn-secondary{background:#eef2ff;color:#1e3a8a}
+.btn-ghost{background:#fff;border:1px solid #d1d5db;color:#374151}
+.btn-danger{background:#fee2e2;color:#b91c1c}
+.result{display:none}
+.result.show{display:block}
+.kv{background:#f8fafc;border-left:4px solid #2563eb;padding:10px 12px;border-radius:8px;margin:8px 0}
+.kv b{color:#1e3a8a}
+.tag{display:inline-block;background:#dbeafe;color:#1e40af;font-size:12px;padding:2px 8px;border-radius:999px;margin:2px 4px 2px 0}
+.vocab{border-bottom:1px dashed #e5e7eb;padding:8px 0}
+.vocab b{color:#111827}
+.sample{border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin:10px 0}
+.sample .q{font-weight:700}
+.sample .opts{color:#374151;font-size:14px;margin:6px 0;white-space:pre-line}
+.sample .ans{color:#047857;font-weight:700}
+.wrong-item{border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin:10px 0}
+.due{background:#fef3c7;color:#92400e;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px}
+.ok{background:#dcfce7;color:#166534;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px}
+footer{text-align:center;color:#6b7280;font-size:12px;padding:10px}
+@media(max-width:600px){header h1{font-size:20px}main{padding:14px 10px 30px}.card{padding:14px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>📘 CET-4 错题讲解助手</h1>
+  <p>CET-4 Wrong-Question Explainer · 粘贴一道四级选择题，得到结构化讲解 + 错题本</p>
+  <span class="badge">规则讲解引擎 · Rule-based · 无需联网 / 无需账号</span>
+</header>
+
+<main>
+  <div class="card">
+    <h2>1 · 粘贴题目，开始讲解</h2>
+    <p class="small">支持直接粘贴四级单选题（含 A/B/C/D 选项）。本工具是<strong>规则讲解引擎</strong>：按内置的四级考点规则和词汇表做匹配分析，不是生成式 AI，不会凭空编造答案。</p>
+    <textarea id="input" placeholder="例如：
+It was not until he arrived home ___ he realized he had left his keys in the office.
+A. when  B. that  C. where  D. which"></textarea>
+    <div>
+      <button class="btn btn-primary" onclick="analyze()">🔍 讲解这道题</button>
+      <button class="btn btn-secondary" onclick="loadRandom()">🎲 随机来一道例题</button>
+      <button class="btn btn-ghost" onclick="clearInput()">清空</button>
+    </div>
+    <div id="result" class="result"></div>
+  </div>
+
+  <div class="card">
+    <h2>2 · 内置例题（10 道，点击加载）</h2>
+    <p class="small">覆盖词汇辨析、虚拟语气、强调句、倒装、时态、固定搭配 6 类常考考点。每道都有答案、考点、生词和干扰项分析。</p>
+    <div id="samples"></div>
+  </div>
+
+  <div class="card">
+    <h2>3 · 我的错题本（存在本机浏览器）</h2>
+    <p class="small">加入错题后按 <b>1 / 3 / 7 天</b>安排复习。数据只存在你的浏览器 localStorage 里，不上传、不注册。</p>
+    <div>
+      <button class="btn btn-secondary" onclick="addCurrentToWrongBook()">＋ 把当前题目加入错题本</button>
+      <button class="btn btn-ghost" onclick="clearWrongBook()">清空错题本</button>
+    </div>
+    <div id="wrongbook"></div>
+  </div>
+
+  <div class="card">
+    <h2>怎么用它备考？</h2>
+    <p>① 做真题时把错题粘贴进来，先看“考点”再看“干扰项陷阱”；② 把错题加入错题本，第二天、第四天、第八天各复习一次；③ 复习时先遮住答案自己重做，再对照“正确思路”。</p>
+  </div>
+</main>
+<footer>Built for ML Empowerment Build Challenge 4.0 · 纯静态页面 · 数据仅存本地</footer>
+
+<script>
+const VOCAB = {
+  abundant:["abundant","adj. 丰富的；大量的","abundant rainfall 充沛的降雨"],
+  compulsory:["compulsory","adj. 强制的；必修的","compulsory education 义务教育"],
+  relevant:["relevant","adj. 相关的；切题的","relevant information 相关信息"],
+  significant:["significant","adj. 重要的；显著的","a significant increase 显著增长"],
+  acquire:["acquire","v. 获得；学到","acquire knowledge 获得知识"],
+  maintain:["maintain","v. 维持；保养","maintain a good habit 保持好习惯"],
+  despite:["despite","prep. 尽管；不管","despite the rain 尽管下雨"],
+  although:["although","conj. 虽然；尽管","although he was tired 虽然他累了"],
+  suggest:["suggest","v. 建议；暗示","suggest that sb. (should) do 建议某人做某事"],
+  advise:["advise","v. 建议；忠告","advise sb. to do 建议某人做某事"],
+  demand:["demand","v. 要求；需求","demand that sb. (should) do 要求某人做某事"],
+  insist:["insist","v. 坚持；坚决要求","insist that sb. (should) do 坚持要求"],
+  allergic:["allergic","adj. 过敏的","be allergic to 对……过敏"],
+  aware:["aware","adj. 意识到的","be aware of 意识到"],
+  capable:["capable","adj. 有能力的","be capable of 能够做"],
+  consist:["consist","v. 由……组成","consist of 由……组成"],
+  contribute:["contribute","v. 贡献；导致","contribute to 导致 / 有助于"],
+  enable:["enable","v. 使能够","enable sb. to do 使某人能够做"],
+  expand:["expand","v. 扩大；扩展","expand the market 扩大市场"],
+  reduce:["reduce","v. 减少；降低","reduce costs 降低成本"],
+  "take effect":["take effect","v. 生效；起作用","The law will take effect 生效"],
+  "come into effect":["come into effect","v. 生效","come into effect on Jan. 1 从1月1日起生效"],
+  "be used to":["be used to","v. 习惯于","be used to doing 习惯于做某事"],
+  "used to":["used to","v. 过去常常","used to do 过去常常做"],
+  "would rather":["would rather","v. 宁愿","would rather do than do 宁愿做……而不做……"],
+  "as if":["as if","conj. 好像；仿佛","as if + 虚拟语气 好像……"],
+  "in spite of":["in spite of","prep. 尽管","in spite of the difficulty 尽管困难"],
+  "not only":["not only","adv. 不仅","not only...but also... 不仅……而且……"],
+  "hardly":["hardly","adv. 几乎不","hardly...when... 刚……就……"],
+  "no sooner":["no sooner","adv. 一……就……","no sooner...than... 一……就……"]
+};
+
+const PATTERNS = [
+  {re:/suggest|advise|demand|insist|require|recommend/i, point:"虚拟语气：suggest / advise / demand / insist / require / recommend + that 从句", method:"从句谓语用 (should) + 动词原形。先找主句的建议类动词，再看从句动词是不是原形，带 -s / -ed 的直接排除。", trap:"干扰项常把从句动词写成第三人称单数或过去式，利用“主句是过去时就该用过去式”的直觉设陷阱。"},
+  {re:/it was not until|it is .* that|it was .* that/i, point:"强调句 / not until…that… 结构", method:"It is/was … that… 中间是被强调成分；not until…that… 固定搭配，that 后是完整句子。先划出 it was…that 框架，再补中间成分。", trap:"干扰项用 when / where / which 代替 that，读起来顺但结构不对。"},
+  {re:/not only/i, point:"倒装：Not only 句首，句子部分倒装", method:"Not only 放在句首时，主句要倒装（助动词提前）。先确认 not only…but also… 结构，再检查倒装语序。", trap:"干扰项保持正常语序，看似通顺，实际违反倒装规则。"},
+  {re:/be used to|used to/i, point:"used to / be used to 辨析", method:"used to do = 过去常常；be used to doing = 习惯于做；be used to do = 被用来做。先看 used to 前面有没有 be，再看后面是 do 还是 doing。", trap:"干扰项只换 do / doing / to do，考的就是后面动词形式。"},
+  {re:/would rather/i, point:"would rather 句型", method:"would rather do than do（宁愿做……而不做……），后面都接动词原形。", trap:"干扰项在第二个动词后加 to 或 -ing。"},
+  {re:/as if|as though/i, point:"as if / as though 虚拟语气", method:"as if 后接虚拟语气：与现在事实相反用过去式，与过去事实相反用 had done。", trap:"干扰项用一般现在时，忽略“与事实相反”。"},
+  {re:/despite|in spite of/i, point:"让步：despite / in spite of + 名词 / 动名词", method:"despite / in spite of 后面接名词或动名词，不接句子；although 后面才接句子。先看空后是名词还是句子。", trap:"干扰项把 although 和 despite 混用，或在 despite 后加从句。"},
+  {re:/hardly.*when|no sooner.*than/i, point:"倒装：hardly…when… / no sooner…than…", method:"hardly / no sooner 句首时主句倒装，when / than 引导从句。", trap:"干扰项用 then 代替 than，或不倒装。"},
+  {re:/by the time/i, point:"时态：by the time + 过去时间，主句用过去完成时", method:"by the time he arrived（过去），主句动作更早，用 had done。", trap:"干扰项用一般过去时，忽略“过去的过去”。"},
+  {re:/if i had|if he had|if she had|if we had|if they had/i, point:"虚拟语气：与过去事实相反的 if 从句", method:"if + had done，主句 would have done。先判断是与过去还是现在事实相反。", trap:"干扰项把主句写成 would do，时态降了一级。"},
+  {re:/the number of|a number of/i, point:"主谓一致：the number of… 谓语用单数；a number of… 谓语用复数", method:"先看是 the number 还是 a number，再定单复数。", trap:"干扰项只换 is / are，考的就是定冠词。"},
+  {re:/allergic|aware|capable|fond|good at|interested in/i, point:"固定搭配：be + adj. + 介词", method:"先记搭配：allergic to, aware of, capable of, fond of, interested in。再代入选项验证。", trap:"干扰项把介词换成 in / for / with，读着像但搭配不对。"}
+];
+
+const SAMPLES = [
+ {id:1,type:"词汇辨析",q:"The new law will come into ___ on January 1st.",opts:"A. effect\nB. force\nC. power\nD. action",answer:"A",point:"固定搭配：come into effect（生效）",trap:"B force 常和 in force（有效）搭配，C power / D action 都不能和 come into 连用。",method:"先看空后没有宾语，想到固定搭配 come into effect；再把 force/power/action 代入，意思都不通。",vocab:["come into effect","take effect"]},
+ {id:2,type:"强调句",q:"It was not until he arrived home ___ he realized he had left his keys in the office.",opts:"A. when\nB. that\nC. where\nD. which",answer:"B",point:"not until…that… 强调句固定结构",trap:"A when 看似时间状语，C where / D which 都是关系词，但这里需要 that 引导强调句。",method:"划出 It was not until…that… 框架，that 后是完整句子，直接选 B。",vocab:[]},
+ {id:3,type:"虚拟语气",q:"The teacher suggested that the students ___ their homework on time.",opts:"A. hand in\nB. hands in\nC. handed in\nD. handing in",answer:"A",point:"suggest + that 从句用 (should) + 动词原形",trap:"B 加了 -s，C 用了过去式，都是利用“主句过去时”的直觉设的陷阱。",method:"看到 suggest，立刻想虚拟语气；从句动词必须是原形 hand in。",vocab:["suggest","advise"]},
+ {id:4,type:"固定搭配",q:"She is allergic ___ pollen in spring.",opts:"A. to\nB. in\nC. for\nD. with",answer:"A",point:"be allergic to（对……过敏）",trap:"B in / C for / D with 都是常见介词，但都不能和 allergic 搭配。",method:"先记搭配 allergic to，再逐个代入排除。",vocab:["allergic"]},
+ {id:5,type:"used to 辨析",q:"He is used to ___ up early in the morning.",opts:"A. get\nB. getting\nC. got\nD. to get",answer:"B",point:"be used to doing（习惯于做某事）",trap:"A get 是 used to do（过去常常），D to get 是 be used to do（被用来做），都换了动词形式。",method:"看到 be used to，马上想到后面接 doing；选 B getting。",vocab:["be used to","used to"]},
+ {id:6,type:"倒装",q:"Not only ___ the work on time, but he also helped others.",opts:"A. he finished\nB. did he finish\nC. he did finish\nD. finished he",answer:"B",point:"Not only 句首，主句部分倒装",trap:"A / C 保持正常语序，看似通顺，实际违反倒装规则。",method:"Not only 在句首 → 助动词提前 → did he finish。",vocab:["not only"]},
+ {id:7,type:"主谓一致",q:"The number of students in our school ___ increasing every year.",opts:"A. is\nB. are\nC. were\nD. have been",answer:"A",point:"the number of… 谓语用单数",trap:"B are / D have been 是被 students 这个复数名词带偏的；C were 时态也不对。",method:"先看 the number（不是 a number），谓语用单数 is。",vocab:[]},
+ {id:8,type:"虚拟语气",q:"If I had more time, I ___ to visit my grandparents more often.",opts:"A. will go\nB. would go\nC. go\nD. went",answer:"B",point:"与现在事实相反：if + 过去式，主句 would + 动词原形",trap:"A will go 是真实条件句，D went 缺少 would。",method:"If I had 是与现在事实相反 → 主句用 would go。",vocab:[]},
+ {id:9,type:"时态",q:"By the time he arrived at the station, the train ___.",opts:"A. left\nB. has left\nC. had left\nD. leaves",answer:"C",point:"by the time + 过去时间，主句用过去完成时",trap:"A left 是一般过去时，忽略了“过去的过去”；B 现在完成时时态错位。",method:"by the time + arrived（过去）→ 更早的动作 had left。",vocab:[]},
+ {id:10,type:"词汇辨析",q:"To learn English well, you need to ___ a large vocabulary.",opts:"A. acquire\nB. require\nC. inquire\nD. admire",answer:"A",point:"acquire = 获得、学到（知识/词汇）",trap:"B require（需要）、C inquire（询问）、D admire（钦佩）都是形近 / 义近词，但都不能和 vocabulary 搭配。",method:"先看空后是 a large vocabulary，能“获得词汇”的是 acquire；再把其余三个代入，意思都不通。",vocab:["acquire","maintain","relevant"]}
+];
+
+let currentText = "";
+
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function findVocab(text){
+  const low = text.toLowerCase(); const out = [];
+  for(const k in VOCAB){ if(low.includes(k)) out.push(VOCAB[k]); }
+  return out.slice(0,8);
+}
+function parseOptions(text){
+  const m = text.match(/[A-D][\.、\)]\s*([^\n\r]+)/g);
+  return m ? m.map(x=>x.trim()) : [];
+}
+function analyzeText(text){
+  const vocab = findVocab(text);
+  const pat = PATTERNS.find(p=>p.re.test(text));
+  const opts = parseOptions(text);
+  let trap = pat ? pat.trap : "干扰项通常是：① 形近词 / 近义词（acquire / require / inquire）；② 时态或单复数只差一个字母；③ 固定搭配只换一个介词。先排除意思明显不通的，再比动词形式。";
+  let point = pat ? pat.point : "词汇辨析 / 语境推断：先划出空前后的关键词（动词、介词、时间状语），再判断考点是搭配、时态还是词义。";
+  let method = pat ? pat.method : "① 划关键词：空前后 3 个词；② 定考点：是搭配、时态、语态还是词义；③ 排除法：先去掉 1–2 个明显错的；④ 代入验证：把剩下的读一遍，看意思和语法都通不通。";
+  return {vocab, pat, opts, trap, point, method};
+}
+function renderResult(text, sample){
+  const a = analyzeText(text);
+  const vocabHtml = a.vocab.length ? a.vocab.map(v=>`<div class="vocab"><b>${esc(v[0])}</b> — ${esc(v[1])}<br><span class="small">${esc(v[2])}</span></div>`).join("") : `<p class="small">这道题里没有命中内置高频词表。先看空前后的动词和介词，那往往就是考点。</p>`;
+  const sampleHtml = sample ? `<div class="kv"><b>参考答案：${sample.answer}</b>　<span class="small">${esc(sample.type)} · ${esc(sample.point)}</span><br><span class="small">${esc(sample.opts.replace(/\n/g," · "))}</span></div>` : "";
+  document.getElementById("result").innerHTML = `
+    <h3>📋 讲解结果 <span class="small">（规则引擎，非生成式 AI）</span></h3>
+    ${sampleHtml}
+    <div class="kv"><b>考点：</b>${esc(a.point)}</div>
+    <h3>📖 生词 / 重点表达</h3>${vocabHtml}
+    <h3>⚠️ 干扰项陷阱</h3><div class="kv">${esc(a.trap)}</div>
+    <h3>✅ 正确思路</h3><div class="kv">${esc(a.method)}</div>
+    ${a.opts.length?`<h3>选项</h3><p>${a.opts.map(esc).join("<br>")}</p>`:""}
+    <p class="small">提示：讲解只给思路，不直接替你做题。先自己选一次，再对照思路复盘，效果最好。</p>`;
+  document.getElementById("result").classList.add("show");
+  document.getElementById("result").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function analyze(){
+  const text = document.getElementById("input").value.trim();
+  if(!text){ alert("请先粘贴或输入一道题目。"); return; }
+  currentText = text;
+  const s = SAMPLES.find(x=>text.includes(x.q.slice(0,20)));
+  renderResult(text, s || null);
+}
+function loadSample(id){
+  const s = SAMPLES.find(x=>x.id===id); if(!s) return;
+  const text = s.q + "\n" + s.opts;
+  document.getElementById("input").value = text;
+  currentText = text;
+  // sample has its own richer explanation
+  const vocabHtml = s.vocab.length ? s.vocab.map(k=>{const v=VOCAB[k]; return v?`<div class="vocab"><b>${esc(v[0])}</b> — ${esc(v[1])}<br><span class="small">${esc(v[2])}</span></div>`:"";}).join("") : `<p class="small">这道题重点在结构，不在生词。</p>`;
+  document.getElementById("result").innerHTML = `
+    <h3>📋 讲解结果 <span class="small">（例题 ${s.id} · ${esc(s.type)}）</span></h3>
+    <div class="kv"><b>参考答案：${s.answer}</b><br><span class="small">${esc(s.opts.replace(/\n/g," · "))}</span></div>
+    <div class="kv"><b>考点：</b>${esc(s.point)}</div>
+    <h3>📖 生词 / 重点表达</h3>${vocabHtml}
+    <h3>⚠️ 干扰项陷阱</h3><div class="kv">${esc(s.trap)}</div>
+    <h3>✅ 正确思路</h3><div class="kv">${esc(s.method)}</div>`;
+  document.getElementById("result").classList.add("show");
+  document.getElementById("result").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function loadRandom(){
+  const s = SAMPLES[Math.floor(Math.random()*SAMPLES.length)];
+  loadSample(s.id);
+}
+function clearInput(){ document.getElementById("input").value=""; document.getElementById("result").classList.remove("show"); currentText=""; }
+
+function renderSamples(){
+  document.getElementById("samples").innerHTML = SAMPLES.map(s=>`
+    <div class="sample">
+      <div class="q">${s.id}. ${esc(s.q)}</div>
+      <div class="opts">${esc(s.opts)}</div>
+      <div><span class="tag">${esc(s.type)}</span><span class="tag">答案 ${s.answer}</span></div>
+      <button class="btn btn-secondary" onclick="loadSample(${s.id})">加载并讲解</button>
+      <button class="btn btn-ghost" onclick="addToWrongBook(${s.id})">＋ 加入错题本</button>
+    </div>`).join("");
+}
+function getWrongBook(){ try{ return JSON.parse(localStorage.getItem("cet4_wrongbook_v1")||"[]"); }catch(e){ return []; } }
+function saveWrongBook(list){ localStorage.setItem("cet4_wrongbook_v1", JSON.stringify(list)); }
+function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x.toISOString().slice(0,10); }
+function addToWrongBook(id){
+  const s = SAMPLES.find(x=>x.id===id); if(!s) return;
+  const list = getWrongBook();
+  if(list.some(x=>x.id===("sample-"+id))){ alert("这道题已在错题本里。"); return; }
+  const today = new Date().toISOString().slice(0,10);
+  list.push({id:"sample-"+id, question:s.q, answer:s.answer, added:today, reviews:[addDays(today,1),addDays(today,3),addDays(today,7)]});
+  saveWrongBook(list); renderWrongBook(); alert("已加入错题本，复习日："+[1,3,7].map(n=>addDays(today,n)).join("、"));
+}
+function addCurrentToWrongBook(){
+  const text = (currentText || document.getElementById("input").value.trim());
+  if(!text){ alert("请先输入或加载一道题目。"); return; }
+  const list = getWrongBook();
+  const today = new Date().toISOString().slice(0,10);
+  list.push({id:"custom-"+Date.now(), question:text.slice(0,200), answer:"（待自己填写）", added:today, reviews:[addDays(today,1),addDays(today,3),addDays(today,7)]});
+  saveWrongBook(list); renderWrongBook(); alert("已加入错题本。");
+}
+function removeWrong(id){ saveWrongBook(getWrongBook().filter(x=>x.id!==id)); renderWrongBook(); }
+function clearWrongBook(){ if(confirm("确定清空全部错题吗？")){ saveWrongBook([]); renderWrongBook(); } }
+function renderWrongBook(){
+  const list = getWrongBook();
+  const today = new Date().toISOString().slice(0,10);
+  if(!list.length){ document.getElementById("wrongbook").innerHTML = `<p class="small">错题本还是空的。从上面选一道例题点“加入错题本”，或分析后点“把当前题目加入错题本”。</p>`; return; }
+  document.getElementById("wrongbook").innerHTML = list.map(x=>{
+    const next = x.reviews.find(d=>d>=today) || x.reviews[x.reviews.length-1];
+    const due = next<=today;
+    return `<div class="wrong-item">
+      <div>${esc(x.question)}</div>
+      <div class="small">答案：${esc(x.answer)} · 加入：${esc(x.added)} · 复习日：${x.reviews.join("、")}</div>
+      <div style="margin-top:6px">${due?`<span class="due">今天该复习了（${next}）</span>`:`<span class="ok">下次复习：${next}</span>`}
+      <button class="btn btn-danger" onclick="removeWrong('${x.id}')">删除</button></div>
+    </div>`;}).join("");
+}
+renderSamples();
+renderWrongBook();
+</script>
+</body>
+</html>
