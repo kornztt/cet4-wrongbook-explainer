@@ -1,8 +1,7 @@
 # ML Empowerment Build Challenge 4.0 — Submission Notes
 
-> 状态（2026-11-17）：作品已完成、本地验证通过、4 张截图已拍好。
-> 还差两步：① 公开演示链接（见 `DEPLOY.md`，三选一，都免费免卡）；
-> ② Devpost 提交（Devpost 账号仍在暂停申诉中，**不要开新号**，等解封后提交）。
+> 状态（2026-11-17 21:26）：作品已完成、已推上 GitHub、GitHub Pages 已开，公开链接已实测能打开。
+> 还差一步：Devpost 提交（Devpost 账号仍在暂停申诉中，**不要开新号**，等解封后提交）。
 
 ## Suggested project title（最终版，直接粘贴）
 
@@ -12,11 +11,10 @@
 
 CET-4 Wrong-Question Explainer is a tiny, free, offline-first web app for Chinese university students preparing for CET-4. Paste a multiple-choice question and it gives a structured breakdown — the tested grammar point, key vocabulary, distractor traps, and a step-by-step method — using a transparent rule-based engine (no API, no fake AI claims). It ships with 10 built-in sample questions and a wrong-question book saved in the browser with 1/3/7-day spaced review reminders, so students stop repeating the same mistakes.
 
-## Demo URL（待填）
+## Demo URL
 
-- 目前：未部署，无公开链接。按 `DEPLOY.md` 三选一拿到链接后填在这里。
-- 备选目标：`https://kornztt.github.io/cet4-wrongbook-explainer/`（选项 A：新建公开仓库 + 已备好的 Pages 工作流）
-- 仓库：与演示站同名，公开仓库，文件：`index.html`、`README.md`、`.github/workflows/pages.yml`
+- 公开链接（已实测 2026-11-17 21:26 能打开，标题和讲解、例题、错题本都显示正常）：https://kornztt.github.io/cet4-wrongbook-explainer/
+- 仓库：https://github.com/kornztt/cet4-wrongbook-explainer ，公开仓库，文件：`index.html`、`README.md`、`SUBMISSION.md`、`DEPLOY.md`（`.github/workflows/pages.yml` 因 GitHub App 无 workflows 权限推不上去，改用 Settings > Pages > Deploy from a branch 部署，不影响使用）
 
 ## Track / category
 
@@ -43,7 +41,7 @@ CET-4 Wrong-Question Explainer is a tiny, free, offline-first web app for Chines
 - [x] 本地验证：`python3 -m http.server` 返回 HTTP 200，标题正确；Firefox 实机渲染 4 张截图全部验证过。
 - [x] 4 张截图已拍好（见上）。
 - [x] 手机适配：CSS 有 max-width 600px 适配；localStorage 只存本机。
-- [ ] Host `index.html` 到公开链接（见 `DEPLOY.md`，三选一）。
-- [ ] 在公开链接上复测一遍（私密窗口打开，点一道例题、加一道错题）。
+- [x] Host `index.html` 到公开链接：https://kornztt.github.io/cet4-wrongbook-explainer/ ，2026-11-17 21:26 实测能打开。
+- [x] 在公开链接上复测一遍：标题、粘贴讲解、错题本 1/3/7 天复习都显示正常。
 - [ ] 确认 Devpost 账号解封，再提交。截止：2026-12-02 02:45 EST（2026-12-02 15:45 北京时间）——至少提前一天交。
 - [ ] Do not claim it is generative AI; the README already says “rule-based” honestly.
